@@ -91,7 +91,6 @@ def main():
     #Training parameters
     img_size = config["TRAIN"]["DATA"]["IMAGE_SIZE"]
     enabled_transform = config["TRAIN"]["TRANSFORM"]
-    enabled_batchwise_transform = config["TRAIN"]["AUG"]["ENABLED"]
     begin_epoch = config["TRAIN"]["TRAIN_PARA"]["BEGIN_EPOCH"] 
     end_epoch = config["TRAIN"]["TRAIN_PARA"]["END_EPOCH"]
     resume = config["TRAIN"]["TRAIN_PARA"]["RESUME"]
