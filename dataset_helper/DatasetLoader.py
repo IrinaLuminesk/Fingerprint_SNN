@@ -86,10 +86,16 @@ class SiameseFingerprintDataset(Dataset):
                 std=self.std
             )
         ])
+    def regenerate_pair(self):
+        self.pairs = self.Create_Pair()
     def __len__(self):
         return self.N
     def __getitem__(self, idx):
         image_path1, image_path2, label = self.pairs[idx]
+
+        #Hiện tại label đang là 0 cho imposter và 1 cho genuine. 
+        # Dùng cái này để convert label sang -1 cho imposter và +1 cho genuine cho CosineEmbeddingLoss
+        label = label * 2 - 1
 
         img1 = Image.open(image_path1).convert("RGB")
         img2 = Image.open(image_path2).convert("RGB")
@@ -98,7 +104,7 @@ class SiameseFingerprintDataset(Dataset):
 
         img1, img2 = transform(img1), transform(img2)
 
-        return tv_tensors.Image(img1), tv_tensors.Image(img2), label
+        return tv_tensors.Image(img1), tv_tensors.Image(img2), torch.tensor(label, dtype=torch.float32)
     
 class DatasetLoader():
     def __init__(self, path, std, mean, img_size, batch_size, number_of_sample, transform = True) -> None:
@@ -109,9 +115,11 @@ class DatasetLoader():
         self.batch_size = batch_size
         self.number_of_sample = number_of_sample
         self.transform = transform
+
+
     def dataset_loader(self, type):
         if type == "train":
-            training_dataset = SiameseFingerprintDataset(
+            self.training_dataset = SiameseFingerprintDataset(
                 path=self.path,
                 image_size=self.img_size,
                 mean=self.mean,
@@ -119,9 +127,9 @@ class DatasetLoader():
                 N=self.number_of_sample,
                 transform_type=type    
             )
-            print("Total train image: {0}".format(len(training_dataset)))
+            print("Total train image: {0}".format(len(self.training_dataset)))
             loader = DataLoader(
-                training_dataset,
+                self.training_dataset,
                 batch_size=self.batch_size,
                 shuffle=True,
                 num_workers=2,          # START HERE
@@ -130,7 +138,7 @@ class DatasetLoader():
                 prefetch_factor=2
             )
         else:
-            testing_dataset = SiameseFingerprintDataset(
+            self.testing_dataset = SiameseFingerprintDataset(
                 path=self.path,
                 image_size=self.img_size,
                 mean=self.mean,
@@ -138,9 +146,9 @@ class DatasetLoader():
                 N=self.number_of_sample,
                 transform_type=type    
             )
-            print("Total test image: {0}".format(len(testing_dataset)))
+            print("Total test image: {0}".format(len(self.testing_dataset)))
             loader = DataLoader(
-                testing_dataset,
+                self.testing_dataset,
                 batch_size=self.batch_size,
                 shuffle=False,
                 num_workers=2,
@@ -149,3 +157,5 @@ class DatasetLoader():
             )
         print()
         return loader
+    def regenerate_pair(self):
+        self.training_dataset.regenerate_pair()
