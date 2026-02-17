@@ -8,9 +8,9 @@ DATASET:
   # DATASET_NAME: CIFAR10
   # ROOT: "../datasets"
   # ROOT_FOLDER: "./datasets/Cifar10"
-  TRAIN_FOLDER: "./datasets/train"
+  TRAIN_FOLDER: "/content/dataset/train"
   TRAIN_SAMPLE: 7000
-  TEST_FOLDER: "./datasets/test"
+  TEST_FOLDER: "/content/dataset/test"
   TEST_SAMPLE: 3000
   ZIP_FOLDER: "./datasets/Cifar10.zip"
   SELECTION_RATIO: 1

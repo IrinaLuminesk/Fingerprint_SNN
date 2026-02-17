@@ -161,6 +161,7 @@ def main():
         train_loss = train_metrics.avg_cosemb_loss
         scheduler.step()
         print()
+        train_data.regenerate_pair() #Tạo mới pairs
         val_metrics = validate(epoch, end_epoch, model, testing_loader, eval_criterion, device)
         val_loss = val_metrics.avg_cosemb_loss
         print()
