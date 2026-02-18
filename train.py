@@ -1,4 +1,5 @@
 import argparse
+from gc import unfreeze
 import os
 import random
 from typing import Sequence
@@ -32,6 +33,26 @@ def parse_args():
     args = parser.parse_args()
     config = YAML_Reader(args.cfg)
     return config
+
+
+def freeze_unfreeze_backbone(model, requires = False):
+    for p in model.model.backbone.parameters():
+        p.requires_grad = requires
+
+def recreate_optimizer_and_scheduler(model, num_epochs, epoch):
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=1e-4,          # smaller LR for fine-tuning
+        weight_decay=1e-2
+    )
+
+    # OPTIONAL: reset scheduler
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer,
+        T_max=num_epochs - epoch,
+        eta_min=1e-6
+    )
+    return optimizer, scheduler
 
 def set_seed(seed=42):
     random.seed(seed)
@@ -130,7 +151,7 @@ def main():
     testing_loader = test_data.dataset_loader("test")
 
     model = SiameseModel(model_type=model_type, embedding_dim=embedding_dim).to(device)
-
+    freeze_unfreeze_backbone(model)
     eval_criterion = nn.CosineEmbeddingLoss(margin=0.5)
     train_criterion = nn.CosineEmbeddingLoss(margin=0.5)
     optimizer = optim.AdamW(model.parameters(), lr=Learning_rate_para["MAX_LR"], weight_decay=1e-2)
@@ -151,8 +172,11 @@ def main():
     #                                      scheduler=scheduler,
     #                                      device=device)
     #     best_acc = Get_Max_Acc(metrics_path)
-
+    UNFREEZE_EPOCH = 20
     for epoch in range(begin_epoch, end_epoch):
+        if epoch == UNFREEZE_EPOCH - 1:
+            freeze_unfreeze_backbone(model, True)
+            optimizer, scheduler = recreate_optimizer_and_scheduler(model=model, num_epochs=end_epoch, epoch=epoch)
         train_metrics = train(epoch, 
                                 end_epoch,
                                 model=model, 
@@ -175,13 +199,13 @@ def main():
         val_TAR_and_FAR_01p = val_metrics.tar_at_far(0.001)
         print()
 
-        # if save_checkpoint == True:
-        #     Saving_Checkpoint(epoch=epoch, 
-        #                     model=model, 
-        #                     optimizer=optimizer, 
-        #                     scheduler=scheduler,
-        #                     last_epoch=epoch, 
-        #                     path=checkpoint_path)
+        if save_checkpoint == True:
+            Saving_Checkpoint(epoch=epoch, 
+                            model=model, 
+                            optimizer=optimizer, 
+                            scheduler=scheduler,
+                            last_epoch=epoch, 
+                            path=checkpoint_path)
 
         print("Epoch [{0}/{1}]: Training loss: {2}, ROC AUC: {3}, EER: {4}, TAR @ FAR=1%: {5}".
             format(epoch, end_epoch, train_loss, train_ROC_AUC, train_EER, train_TAR_and_FAR_1p))
