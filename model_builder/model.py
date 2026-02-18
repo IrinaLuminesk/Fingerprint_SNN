@@ -1,5 +1,3 @@
-from turtle import forward
-from typing import Any
 import torch.nn as nn
 from torchvision.models import resnet50, ResNet50_Weights,\
     densenet201, DenseNet201_Weights,\

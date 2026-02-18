@@ -58,6 +58,7 @@ def train(epoch: int, end_epoch: int, model, loader, criterion, optimizer, devic
         optimizer.step()
 
         metrics.update_train(loss=loss, outputs1=outputs1, outputs2=outputs2, targets=targets)
+    metrics.compute_fpr_tpr_thresholds()
     return metrics
 
 def validate(epoch, end_epoch, model, loader, criterion, device):
@@ -72,6 +73,7 @@ def validate(epoch, end_epoch, model, loader, criterion, device):
             outputs1, outputs2 = model(inputs1, inputs2)
             loss = criterion(outputs1, outputs2, targets)
             metrics.update_test(loss=loss, outputs1=outputs1, outputs2=outputs2, targets=targets)
+    metrics.compute_fpr_tpr_thresholds()
     return metrics
 
 def main():
@@ -158,12 +160,19 @@ def main():
                                 criterion=train_criterion, 
                                 optimizer=optimizer, 
                                 device=device)
-        train_loss = train_metrics.avg_cosemb_loss
+        train_loss, train_ROC_AUC = train_metrics.avg_cosemb_loss, train_metrics.ROC_AUC
+        train_EER = train_metrics.EER
+        train_TAR_and_FAR_1p = train_metrics.tar_at_far(0.01)
+        train_TAR_and_FAR_01p = train_metrics.tar_at_far(0.001)
         scheduler.step()
         print()
         train_data.regenerate_pair() #Tạo mới pairs
+        
         val_metrics = validate(epoch, end_epoch, model, testing_loader, eval_criterion, device)
-        val_loss = val_metrics.avg_cosemb_loss
+        val_loss, val_ROC_AUC = val_metrics.avg_cosemb_loss, val_metrics.ROC_AUC
+        val_EER = val_metrics.EER
+        val_TAR_and_FAR_1p = val_metrics.tar_at_far(0.01)
+        val_TAR_and_FAR_01p = val_metrics.tar_at_far(0.001)
         print()
 
         # if save_checkpoint == True:
@@ -174,10 +183,10 @@ def main():
         #                     last_epoch=epoch, 
         #                     path=checkpoint_path)
 
-        print("Epoch [{0}/{1}]: Training loss: {2}".
-            format(epoch, end_epoch, train_loss))
-        print("Epoch [{0}/{1}]: Validation loss: {2}".
-            format(epoch, end_epoch, val_loss))
+        print("Epoch [{0}/{1}]: Training loss: {2}, ROC AUC: {3}, EER: {4}, TAR @ FAR=1%: {5}".
+            format(epoch, end_epoch, train_loss, train_ROC_AUC, train_EER, train_TAR_and_FAR_1p))
+        print("Epoch [{0}/{1}]: Validation loss: {2}, ROC AUC: {3}, EER: {4}, TAR @ FAR=1%: {5}".
+            format(epoch, end_epoch, val_loss, val_ROC_AUC, val_EER, val_TAR_and_FAR_1p))
         # if val_acc > best_acc:
         #     if save_best == True:
         #         print("Validation accuracy increase from {0}% to {1}% at epoch {2}. Saving best result".
