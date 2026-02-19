@@ -25,9 +25,16 @@ class Model(nn.Module):
 
 
                 backbone = nn.Sequential(*list(model.children())[:-1])
+                # embedding_layer = nn.Sequential(
+                #     nn.Linear(in_features, self.embedding_dim),
+                #     nn.BatchNorm1d(self.embedding_dim)
+                # )
                 embedding_layer = nn.Sequential(
-                    nn.Linear(in_features, self.embedding_dim),
-                    nn.BatchNorm1d(self.embedding_dim)
+                    nn.Linear(in_features, 1024),
+                    nn.ReLU(inplace=True),
+                    nn.Linear(1024, 128),
+                    nn.ReLU(inplace=True),
+                    nn.Linear(128,2)
                 )
                 print("Training on Resnet50 architecture")
                 return backbone, embedding_layer

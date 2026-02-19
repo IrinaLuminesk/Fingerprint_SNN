@@ -151,7 +151,7 @@ def main():
     testing_loader = test_data.dataset_loader("test")
 
     model = SiameseModel(model_type=model_type, embedding_dim=embedding_dim).to(device)
-    freeze_unfreeze_backbone(model)
+    # freeze_unfreeze_backbone(model)
     eval_criterion = nn.CosineEmbeddingLoss(margin=0.5)
     train_criterion = nn.CosineEmbeddingLoss(margin=0.5)
     optimizer = optim.AdamW(model.parameters(), lr=Learning_rate_para["MAX_LR"], weight_decay=1e-2)
@@ -174,9 +174,9 @@ def main():
     #     best_acc = Get_Max_Acc(metrics_path)
     UNFREEZE_EPOCH = 20
     for epoch in range(begin_epoch, end_epoch):
-        if epoch == UNFREEZE_EPOCH - 1:
-            freeze_unfreeze_backbone(model, True)
-            optimizer, scheduler = recreate_optimizer_and_scheduler(model=model, num_epochs=end_epoch, epoch=epoch)
+        # if epoch == UNFREEZE_EPOCH - 1:
+        #     freeze_unfreeze_backbone(model, True)
+        #     optimizer, scheduler = recreate_optimizer_and_scheduler(model=model, num_epochs=end_epoch, epoch=epoch)
         train_metrics = train(epoch, 
                                 end_epoch,
                                 model=model, 
