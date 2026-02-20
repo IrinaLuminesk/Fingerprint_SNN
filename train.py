@@ -72,6 +72,7 @@ def set_seed(seed=42):
 
 def train(epoch: int, end_epoch: int, model, loader, criterion, optimizer, device):
     model.train()
+    # freeze_bn(model)
     metrics = MetricCalV2(device=device)
     for inputs1, inputs2, targets in tqdm(loader, total=len(loader), desc="Training epoch [{0}/{1}]".
                                 format(epoch, end_epoch)):
@@ -158,7 +159,7 @@ def main():
     testing_loader = test_data.dataset_loader("test")
 
     model = SiameseModel(model_type=model_type, embedding_dim=embedding_dim).to(device)
-    freeze_bn(model)
+    # freeze_bn(model)
     eval_criterion = nn.CosineEmbeddingLoss(margin=0.5)
     train_criterion = nn.CosineEmbeddingLoss(margin=0.5)
     optimizer = optim.AdamW(model.parameters(), lr=Learning_rate_para["MAX_LR"], weight_decay=1e-2)

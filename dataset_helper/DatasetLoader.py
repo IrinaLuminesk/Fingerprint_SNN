@@ -11,14 +11,14 @@ import random
 from PIL import Image
 
 class SiameseFingerprintDataset(Dataset):
-    def __init__(self, path, N, image_size, mean, std, transform_type="train"):
+    def __init__(self, path, N, image_size, mean, std, transform_type="train", enabled_transform=False):
         self.path = Path(path) #Đường dẫn dataset
         self.N = N #Số lượng pair sẽ được tạo
         self.image_size = image_size
         self.mean = mean
         self.std = std
         self.transform_type = transform_type
-        
+        self.enabled_transform = enabled_transform
         #Tạo contraint
         self.person_ids = [i for i in os.listdir(self.path)]
         if N < 2 * len(self.person_ids):
@@ -67,8 +67,26 @@ class SiameseFingerprintDataset(Dataset):
         random.shuffle(pairs)
         return pairs 
     def train_transform(self):
+        if self.enabled_transform == False:
+            return v2.Compose([
+                v2.Resize(self.image_size),
+                v2.ToImage(),
+                v2.ToDtype(torch.float32, scale=True),
+                v2.Normalize(
+                    mean=self.mean,
+                    std=self.std
+                )
+            ])
         return v2.Compose([
             v2.Resize(self.image_size),
+            v2.RandomChoice(
+                [
+                    v2.RandomHorizontalFlip(),
+                    v2.RandomRotation(degrees=(-15,15)),
+                    v2.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
+                    v2.Lambda(lambda x: x),
+                ]
+            ),
             v2.ToImage(),
             v2.ToDtype(torch.float32, scale=True),
             v2.Normalize(
@@ -107,7 +125,7 @@ class SiameseFingerprintDataset(Dataset):
         return tv_tensors.Image(img1), tv_tensors.Image(img2), torch.tensor(label, dtype=torch.float32)
     
 class DatasetLoader():
-    def __init__(self, path, std, mean, img_size, batch_size, number_of_sample, transform = True) -> None:
+    def __init__(self, path, std, mean, img_size, batch_size, number_of_sample, transform = False) -> None:
         self.path = path
         self.std = std
         self.mean = mean
@@ -125,7 +143,8 @@ class DatasetLoader():
                 mean=self.mean,
                 std=self.std,
                 N=self.number_of_sample,
-                transform_type=type    
+                transform_type=type,
+                enabled_transform=self.transform
             )
             print("Total train image: {0}".format(len(self.training_dataset)))
             loader = DataLoader(
@@ -144,7 +163,8 @@ class DatasetLoader():
                 mean=self.mean,
                 std=self.std,
                 N=self.number_of_sample,
-                transform_type=type    
+                transform_type=type,
+                enabled_transform=False
             )
             print("Total test image: {0}".format(len(self.testing_dataset)))
             loader = DataLoader(
