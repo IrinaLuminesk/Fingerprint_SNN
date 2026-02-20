@@ -39,6 +39,13 @@ def freeze_unfreeze_backbone(model, requires = False):
     for p in model.model.backbone.parameters():
         p.requires_grad = requires
 
+def freeze_bn(model):
+    for m in model.model.backbone.modules():
+        if isinstance(m, torch.nn.BatchNorm2d):
+            m.eval()
+            m.weight.requires_grad_(False)
+            m.bias.requires_grad_(False)
+
 def recreate_optimizer_and_scheduler(model, num_epochs, epoch):
     optimizer = torch.optim.AdamW(
         model.parameters(),
@@ -151,7 +158,7 @@ def main():
     testing_loader = test_data.dataset_loader("test")
 
     model = SiameseModel(model_type=model_type, embedding_dim=embedding_dim).to(device)
-    # freeze_unfreeze_backbone(model)
+    freeze_bn(model)
     eval_criterion = nn.CosineEmbeddingLoss(margin=0.5)
     train_criterion = nn.CosineEmbeddingLoss(margin=0.5)
     optimizer = optim.AdamW(model.parameters(), lr=Learning_rate_para["MAX_LR"], weight_decay=1e-2)
