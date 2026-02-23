@@ -32,7 +32,7 @@ class Model(nn.Module):
                 embedding_layer = nn.Sequential(
                     nn.Linear(in_features, 1024),
                     nn.ReLU(inplace=True),
-                    nn.Linear(1024, 256)
+                    nn.Linear(1024, self.embedding_dim)
                 )
                 print("Training on Resnet50 architecture")
                 return backbone, embedding_layer

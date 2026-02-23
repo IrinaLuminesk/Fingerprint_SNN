@@ -93,15 +93,15 @@ def Saving_Metric(epoch, train_acc, train_loss, top1_val_acc, top5_val_acc, val_
     metrics_df.to_csv(path, index=False)
 
 def Saving_Metric2(epoch, 
-                   train_acc,
-                   train_precision,
-                   train_recall,
-                   train_f1, 
+                   train_ROC_AUC,
+                   train_EER,
+                   train_TAR_and_FAR_1p,
+                   train_TAR_and_FAR_01p, 
                    train_loss, 
-                   val_acc,
-                   val_precision,
-                   val_recall,
-                   val_f1, 
+                   val_ROC_AUC,
+                   val_EER,
+                   val_TAR_and_FAR_1p,
+                   val_TAR_and_FAR_01p, 
                    val_loss, path):
     Create_Folder(path=path)
     if os.path.exists(path):
@@ -110,29 +110,29 @@ def Saving_Metric2(epoch,
         metrics_df = pd.DataFrame({
             'epoch': pd.Series(dtype='int'),
             'train_loss': pd.Series(dtype='float'),
-            'train_acc': pd.Series(dtype='float'),
-            'train_precision': pd.Series(dtype='float'),
-            'train_recall': pd.Series(dtype='float'),
-            'train_f1': pd.Series(dtype='float'),
+            'train_ROC_AUC': pd.Series(dtype='float'),
+            'train_EER': pd.Series(dtype='float'),
+            'train_TAR_and_FAR_1p': pd.Series(dtype='float'),
+            'train_TAR_and_FAR_01p': pd.Series(dtype='float'),
             'val_loss': pd.Series(dtype='float'),
-            'val_acc': pd.Series(dtype='float'),
-            'val_precision': pd.Series(dtype='float'),
-            'val_recall': pd.Series(dtype='float'),
-            'val_f1': pd.Series(dtype='float'),
+            'val_ROC_AUC': pd.Series(dtype='float'),
+            'val_EER': pd.Series(dtype='float'),
+            'val_TAR_and_FAR_1p': pd.Series(dtype='float'),
+            'val_TAR_and_FAR_01p': pd.Series(dtype='float'),
             'lr': pd.Series(dtype='float')
         })
     new_row = {
         'epoch': epoch,
         'train_loss': train_loss,
-        'train_acc': train_acc,
-        'train_precision': train_precision,
-        'train_recall': train_recall,
-        'train_f1': train_f1,
+        'train_ROC_AUC': train_ROC_AUC,
+        'train_EER': train_EER,
+        'train_TAR_and_FAR_1p': train_TAR_and_FAR_1p,
+        'train_TAR_and_FAR_01p': train_TAR_and_FAR_01p,
         'val_loss': val_loss,
-        'val_acc': val_acc,
-        'val_precision': val_precision,
-        'val_recall': val_recall,
-        'val_f1': val_f1,
+        'val_ROC_AUC': val_ROC_AUC,
+        'val_EER': val_EER,
+        'val_TAR_and_FAR_1p': val_TAR_and_FAR_1p,
+        'val_TAR_and_FAR_01p': val_TAR_and_FAR_01p,
     }
     metrics_df = pd.concat([metrics_df, pd.DataFrame([new_row])], ignore_index=True)
     metrics_df.to_csv(path, index=False)
@@ -151,12 +151,12 @@ def Loading_Checkpoint(path, model, optimizer, scheduler, device):
     print(f"Resumed from epoch {start_epoch}")
     return start_epoch
 
-def Get_Max_Acc(path):
+def Get_Min_EER(path):
     df = pd.read_csv(path)
 
-    best_acc = df['val_acc'].max()
+    best_eer = df['val_EER'].min() #Ngược với classification
 
-    return best_acc 
+    return best_eer 
 
 def get_num_workers(transform_heavy=True):
     # 1. Detect CPU cores

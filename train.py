@@ -11,7 +11,7 @@ from learning_rate_helper.learning_rate import PiecewiseScheduler
 from model_builder.model import SiameseModel
 from dataset_helper.DatasetLoader import DatasetLoader
 from utils.MetricCalV2 import MetricCalV2
-from utils.Utilities import Get_Max_Acc, Loading_Checkpoint, Saving_Best, Saving_Checkpoint, Saving_Metric2, YAML_Reader, get_mean_std
+from utils.Utilities import Get_Min_EER, Loading_Checkpoint, Saving_Best, Saving_Checkpoint, Saving_Metric2, YAML_Reader, get_mean_std
 # from CBAM_Resnet import Model as CBAM_Resnet
 
 import torch
@@ -171,15 +171,15 @@ def main():
         eta_min=1e-6
     )
     print("Training using CosineAnnealingLR")
-    best_acc = 0
+    best_eer = 999999999999
 
-    # if resume == True:
-    #     begin_epoch = Loading_Checkpoint(path=checkpoint_path,
-    #                                      model=model,
-    #                                      optimizer=optimizer,
-    #                                      scheduler=scheduler,
-    #                                      device=device)
-    #     best_acc = Get_Max_Acc(metrics_path)
+    if resume == True:
+        begin_epoch = Loading_Checkpoint(path=checkpoint_path,
+                                         model=model,
+                                         optimizer=optimizer,
+                                         scheduler=scheduler,
+                                         device=device)
+        best_eer = Get_Min_EER(metrics_path)
     UNFREEZE_EPOCH = 20
     for epoch in range(begin_epoch, end_epoch):
         # if epoch == UNFREEZE_EPOCH - 1:
@@ -198,7 +198,8 @@ def main():
         train_TAR_and_FAR_01p = train_metrics.tar_at_far(0.001)
         scheduler.step()
         print()
-        train_data.regenerate_pair() #Tạo mới pairs
+        if epoch % 4 == 0: #Chỉ tạo mới sau 5 epoch, chia hết cho 4 vì epoch bắt đầu là 0 
+            train_data.regenerate_pair() #Tạo mới pairs
         
         val_metrics = validate(epoch, end_epoch, model, testing_loader, eval_criterion, device)
         val_loss, val_ROC_AUC = val_metrics.avg_cosemb_loss, val_metrics.ROC_AUC
@@ -219,34 +220,34 @@ def main():
             format(epoch, end_epoch, train_loss, train_ROC_AUC, train_EER, train_TAR_and_FAR_1p))
         print("Epoch [{0}/{1}]: Validation loss: {2}, ROC AUC: {3}, EER: {4}, TAR @ FAR=1%: {5}".
             format(epoch, end_epoch, val_loss, val_ROC_AUC, val_EER, val_TAR_and_FAR_1p))
-        # if val_acc > best_acc:
-        #     if save_best == True:
-        #         print("Validation accuracy increase from {0}% to {1}% at epoch {2}. Saving best result".
-        #             format(round(best_acc * 100.0, 2), round(val_acc * 100.0, 2),  epoch))
-        #         Saving_Best(model, best_path)
-        #     else:
-        #         print("Validation accuracy increase from {0}% to {1}% at epoch {2}".
-        #             format(round(best_acc * 100.0, 2), round(val_acc * 100.0, 2),  epoch))
-        #     best_acc = val_acc
-        #     epochs_no_improve = 0  # reset patience
-        # else:
-        #     epochs_no_improve += 1
-        # if save_metrics:
-        #     Saving_Metric2(epoch=epoch, 
-        #                    train_loss=train_loss,
-        #                    train_acc=train_acc,
-        #                    train_precision=train_metrics.precision_macro,
-        #                    train_recall=train_metrics.recall_macro,
-        #                    train_f1=train_metrics.f1_macro, 
-        #                    val_loss=val_loss,
-        #                    val_acc=val_acc,
-        #                    val_precision=val_metrics.precision_macro,
-        #                    val_recall=val_metrics.recall_macro,
-        #                    val_f1=val_metrics.f1_macro, 
-        #                    path=metrics_path)
-        # if epochs_no_improve >= patience and early_stopping == True:
-        #     print("Early stopping triggered at epoch {0}".format(epoch))
-        #     break
+        if val_EER < best_eer:
+            if save_best == True:
+                print("Validation EER improve from {0} to {1} at epoch {2}. Saving best result".
+                    format(round(best_eer, 4), round(val_EER, 4),  epoch))
+                Saving_Best(model, best_path)
+            else:
+                print("Validation accuracy improve from {0} to {1} at epoch {2}".
+                    format(round(best_eer, 4), round(val_EER, 4),  epoch))
+            best_eer = val_EER
+            epochs_no_improve = 0  # reset patience
+        else:
+            epochs_no_improve += 1
+        if save_metrics:
+            Saving_Metric2(epoch=epoch, 
+                           train_loss=train_loss,
+                           train_ROC_AUC=train_ROC_AUC,
+                           train_EER=train_EER,
+                           train_TAR_and_FAR_1p=train_TAR_and_FAR_1p,
+                           train_TAR_and_FAR_01p=train_TAR_and_FAR_01p, 
+                           val_loss=val_loss,
+                           val_ROC_AUC=val_ROC_AUC,
+                           val_EER=val_EER,
+                           val_TAR_and_FAR_1p=val_TAR_and_FAR_1p,
+                           val_TAR_and_FAR_01p=val_TAR_and_FAR_01p, 
+                           path=metrics_path)
+        if epochs_no_improve >= patience and early_stopping == True:
+            print("Early stopping triggered at epoch {0}".format(epoch))
+            break
         print()
 
     
