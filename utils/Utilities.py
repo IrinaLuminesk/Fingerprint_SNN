@@ -59,7 +59,7 @@ def Saving_Checkpoint(epoch, model, optimizer, scheduler, last_epoch, path):
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
-        'scheduler_state_dict': scheduler.state_dict(),
+        'scheduler_state_dict': None,
         "last_epoch": last_epoch
     }, path)
 

@@ -9,9 +9,9 @@ DATASET:
   # ROOT: "../datasets"
   # ROOT_FOLDER: "./datasets/Cifar10"
   TRAIN_FOLDER: "/content/dataset/train"
-  TRAIN_SAMPLE: 7000
+  TRAIN_SAMPLE: 7000 #True pair 6216
   TEST_FOLDER: "/content/dataset/test"
-  TEST_SAMPLE: 3000
+  TEST_SAMPLE: 1128
   ZIP_FOLDER: "./datasets/Cifar10.zip"
   SELECTION_RATIO: 1
   SPLIT_RATIO: 0.7
@@ -35,9 +35,9 @@ TRAIN:
     STD: [0.29716831, 0.29716831, 0.29716831]
   TRAIN_PARA:
     MODEL_TYPE: 1 #{1: Resnet50, 2: DenseNet201, 3: VGG19, 4: ConvNeXt_Large, 5: MobileNet}
-    EMBEDDING_DIM: 256
+    EMBEDDING_DIM: 128
     BEGIN_EPOCH: 0
-    END_EPOCH: 100
+    END_EPOCH: 30
     LAST_EPOCH: 0
     OPTIMIZER: "AdamW"
     RESUME: False

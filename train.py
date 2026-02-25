@@ -159,17 +159,22 @@ def main():
     testing_loader = test_data.dataset_loader("test")
 
     model = SiameseModel(model_type=model_type, embedding_dim=embedding_dim).to(device)
-    # freeze_bn(model)
-    eval_criterion = nn.CosineEmbeddingLoss(margin=0.5)
-    train_criterion = nn.CosineEmbeddingLoss(margin=0.5)
-    optimizer = optim.AdamW(model.parameters(), lr=Learning_rate_para["MAX_LR"], weight_decay=1e-2)
-
-
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer,
-        T_max=end_epoch,
-        eta_min=1e-6
+    freeze_unfreeze_backbone(model)
+    eval_criterion = nn.CosineEmbeddingLoss(margin=0.2)
+    train_criterion = nn.CosineEmbeddingLoss(margin=0.2)
+    # optimizer = optim.AdamW(model.parameters(), lr=Learning_rate_para["MAX_LR"], weight_decay=5e-5)
+    optimizer = torch.optim.Adam(
+        filter(lambda p: p.requires_grad, model.parameters()),
+        lr=1e-3,
+        weight_decay=1e-4
     )
+
+
+    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    #     optimizer,
+    #     T_max=end_epoch,
+    #     eta_min=1e-6
+    # )
     print("Training using CosineAnnealingLR")
     best_eer = 999999999999
 
@@ -177,7 +182,7 @@ def main():
         begin_epoch = Loading_Checkpoint(path=checkpoint_path,
                                          model=model,
                                          optimizer=optimizer,
-                                         scheduler=scheduler,
+                                         scheduler=None,
                                          device=device)
         best_eer = Get_Min_EER(metrics_path)
     UNFREEZE_EPOCH = 20
@@ -196,7 +201,7 @@ def main():
         train_EER = train_metrics.EER
         train_TAR_and_FAR_1p = train_metrics.tar_at_far(0.01)
         train_TAR_and_FAR_01p = train_metrics.tar_at_far(0.001)
-        scheduler.step()
+        # scheduler.step()
         print()
         if epoch % 4 == 0: #Chỉ tạo mới sau 5 epoch, chia hết cho 4 vì epoch bắt đầu là 0 
             train_data.regenerate_pair() #Tạo mới pairs
@@ -212,7 +217,7 @@ def main():
             Saving_Checkpoint(epoch=epoch, 
                             model=model, 
                             optimizer=optimizer, 
-                            scheduler=scheduler,
+                            scheduler=None,
                             last_epoch=epoch, 
                             path=checkpoint_path)
 

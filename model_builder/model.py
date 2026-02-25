@@ -1,5 +1,5 @@
 import torch.nn as nn
-from torchvision.models import resnet50, ResNet50_Weights,\
+from torchvision.models import resnet18, ResNet18_Weights,\
     densenet201, DenseNet201_Weights,\
     vgg16, VGG16_Weights, \
     mobilenet_v2, MobileNet_V2_Weights, \
@@ -17,8 +17,8 @@ class Model(nn.Module):
     def build_model(self):
         match self.model_type:
             case 1: #Resnet50
-                resnet_weights = ResNet50_Weights.DEFAULT
-                model = resnet50(weights=resnet_weights)
+                resnet_weights = ResNet18_Weights.DEFAULT
+                model = resnet18(weights=resnet_weights)
 
 
                 in_features = model.fc.in_features #2048
@@ -30,9 +30,7 @@ class Model(nn.Module):
                 #     nn.BatchNorm1d(self.embedding_dim)
                 # )
                 embedding_layer = nn.Sequential(
-                    nn.Linear(in_features, 1024),
-                    nn.ReLU(inplace=True),
-                    nn.Linear(1024, self.embedding_dim)
+                    nn.Linear(in_features, self.embedding_dim),
                 )
                 print("Training on Resnet50 architecture")
                 return backbone, embedding_layer

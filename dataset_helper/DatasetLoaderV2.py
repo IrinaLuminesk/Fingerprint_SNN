@@ -53,9 +53,9 @@ class SiameseFingerprintDataset(Dataset):
     def Create_Train_Pairs(self):
         half = self.N // 2
         
-        genuine_pairs = self.sample_with_limited_duplicates(len(self.genuine_pairs), half)
+        genuine_pairs = self.sample_with_limited_duplicates(self.genuine_pairs, half)
 
-        imposter_pairs = self.sample_with_limited_duplicates(len(self.imposter_pairs), half)
+        imposter_pairs = self.sample_with_limited_duplicates(self.imposter_pairs, half)
 
         pairs = genuine_pairs + imposter_pairs
         
