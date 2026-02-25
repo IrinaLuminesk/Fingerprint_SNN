@@ -9,7 +9,7 @@ from tqdm import tqdm
 # from Metrics.MetricCal import MetricCal
 from learning_rate_helper.learning_rate import PiecewiseScheduler
 from model_builder.model import SiameseModel
-from dataset_helper.DatasetLoader import DatasetLoader
+from dataset_helper.DatasetLoaderV2 import DatasetLoader
 from utils.MetricCalV2 import MetricCalV2
 from utils.Utilities import Get_Min_EER, Loading_Checkpoint, Saving_Best, Saving_Checkpoint, Saving_Metric2, YAML_Reader, get_mean_std
 # from CBAM_Resnet import Model as CBAM_Resnet
