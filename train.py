@@ -160,8 +160,8 @@ def main():
 
     model = SiameseModel(model_type=model_type, embedding_dim=embedding_dim).to(device)
     freeze_unfreeze_backbone(model)
-    eval_criterion = nn.CosineEmbeddingLoss(margin=0.2)
-    train_criterion = nn.CosineEmbeddingLoss(margin=0.2)
+    eval_criterion = nn.CosineEmbeddingLoss(margin=0.4)
+    train_criterion = nn.CosineEmbeddingLoss(margin=0.4)
     # optimizer = optim.AdamW(model.parameters(), lr=Learning_rate_para["MAX_LR"], weight_decay=5e-5)
     optimizer = torch.optim.Adam(
         filter(lambda p: p.requires_grad, model.parameters()),
