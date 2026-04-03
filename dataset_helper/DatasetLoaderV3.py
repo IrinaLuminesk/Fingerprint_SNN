@@ -14,8 +14,8 @@ class SiameseFingerprintDataset(Dataset):
         self.batch_size = batch_size
         self.data_path = data_path 
     def build_dataset(self, data_type):
-        dataset = ImageFolder(self.data_path, transform=self.train_transform() if data_type == "Train" else self.test_transform())
-        if data_type == "Train":
+        dataset = ImageFolder(self.data_path, transform=self.train_transform() if data_type == "train" else self.test_transform())
+        if data_type == "train":
             self.p = 8
             self.k = 8
             batch_size = self.p * self.k
@@ -55,6 +55,7 @@ class PKSampler(Sampler):
     def __init__(self, groups, p, k):
         self.p = p
         self.k = k
+        self.targets = groups
         self.groups = create_groups(groups, self.k)
 
         # Ensures there are enough classes to sample from
@@ -87,6 +88,8 @@ class PKSampler(Sampler):
                 # Don't sample from group if it has less than k samples remaining
                 if group_samples_remaining[group_id] < self.k:
                     group_samples_remaining.pop(group_id)
+    def __len__(self):
+        return len(self.targets) // (self.p * self.k)
 
 def create_groups(groups, k):
     group_samples = defaultdict(list)
