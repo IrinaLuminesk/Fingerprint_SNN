@@ -6,7 +6,8 @@ class Model(nn.Module):
         self.embedding_dim = embedding_dim
         self.backbone = self.build_model() 
     def build_model(self):
-        backbone = resnet50(num_classes=self.embedding_dim, weights=ResNet50_Weights.DEFAULT)
+        backbone = resnet50(weights=ResNet50_Weights.DEFAULT)
+        backbone.fc = nn.Linear(backbone.fc.in_features, self.embedding_dim)
         return backbone
     def forward(self, x):
         x = self.backbone(x)

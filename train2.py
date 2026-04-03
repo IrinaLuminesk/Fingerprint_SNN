@@ -68,7 +68,7 @@ def validate(epoch, end_epoch, model, loader, criterion, device):
     with torch.no_grad():
         for inputs, targets in tqdm(loader, total=len(loader), desc="Validating epoch [{0}/{1}]".
                                 format(epoch, end_epoch)):
-            inputs1 = inputs.to(device, non_blocking=True)
+            inputs = inputs.to(device, non_blocking=True)
             targets = targets.to(device, non_blocking=True)
             
             outputs = model(inputs)

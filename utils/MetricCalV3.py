@@ -93,5 +93,5 @@ class MetricCalV3():
         return self.eer
     @property
     def tar_at_far(self):
-        self.tpr
+        return self.tpr
     
