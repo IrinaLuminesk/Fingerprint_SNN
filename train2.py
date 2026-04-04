@@ -184,10 +184,10 @@ def main():
                             last_epoch=epoch, 
                             path=checkpoint_path)
 
-        print("Epoch [{0}/{1}]: Training loss: {2}, ROC AUC: {3}, EER: {4}, TAR @ FAR=1%: {5}".
-            format(epoch, end_epoch, train_loss, train_ROC_AUC, train_EER, train_TAR_and_FAR_1e3p))
-        print("Epoch [{0}/{1}]: Validation loss: {2}, ROC AUC: {3}, EER: {4}, TAR @ FAR=1%: {5}".
-            format(epoch, end_epoch, val_loss, val_ROC_AUC, val_EER, val_TAR_and_FAR_1e3p))
+        print("Epoch [{0}/{1}]: Training loss: {2}, ROC AUC: {3}, EER: {4}, TAR @ FAR=1e3: {5}, TAR @ FAR=1e4: {6}".
+            format(epoch, end_epoch, train_loss, train_ROC_AUC, train_EER, train_TAR_and_FAR_1e3p, train_TAR_and_FAR_1e4p))
+        print("Epoch [{0}/{1}]: Validation loss: {2}, ROC AUC: {3}, EER: {4}, TAR @ FAR=1e3%: {5}, TAR @ FAR=1e4: {6}".
+            format(epoch, end_epoch, val_loss, val_ROC_AUC, val_EER, val_TAR_and_FAR_1e3p, val_TAR_and_FAR_1e4p))
         if val_EER < best_eer:
             if save_best == True:
                 print("Validation EER improve from {0} to {1} at epoch {2}. Saving best result".
@@ -206,10 +206,12 @@ def main():
                            train_ROC_AUC=train_ROC_AUC,
                            train_EER=train_EER,
                            train_TAR_and_FAR_1e3p=train_TAR_and_FAR_1e3p,
+                           train_TAR_and_FAR_1e4p=train_TAR_and_FAR_1e4p,
                            val_loss=val_loss,
                            val_ROC_AUC=val_ROC_AUC,
                            val_EER=val_EER,
                            val_TAR_and_FAR_1e3p=val_TAR_and_FAR_1e3p,
+                           val_TAR_and_FAR_1e4p=val_TAR_and_FAR_1e4p,
                            path=metrics_path)
         if epochs_no_improve >= patience and early_stopping == True:
             print("Early stopping triggered at epoch {0}".format(epoch))
