@@ -165,13 +165,15 @@ def main():
                                 device=device)
         train_loss, train_ROC_AUC = train_metrics.avg_loss, train_metrics.ROC_AUC
         train_EER = train_metrics.EER
-        train_TAR_and_FAR_1e3p = train_metrics.tar_at_far
+        train_TAR_and_FAR_1e3p = train_metrics.tar_at_far1e3
+        train_TAR_and_FAR_1e4p = train_metrics.tar_at_far1e4
         print()
         
         val_metrics = validate(epoch, end_epoch, model, testing_loader, eval_criterion, device)
         val_loss, val_ROC_AUC = val_metrics.avg_loss, val_metrics.ROC_AUC
         val_EER = val_metrics.EER
-        val_TAR_and_FAR_1e3p = val_metrics.tar_at_far
+        val_TAR_and_FAR_1e3p = val_metrics.tar_at_far1e3
+        val_TAR_and_FAR_1e4p = val_metrics.tar_at_far1e4
         print()
 
         if save_checkpoint == True:

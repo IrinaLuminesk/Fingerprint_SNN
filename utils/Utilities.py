@@ -96,10 +96,12 @@ def Saving_Metric2(epoch,
                    train_ROC_AUC,
                    train_EER,
                    train_TAR_and_FAR_1e3p,
+                   train_TAR_and_FAR_1e4p,
                    train_loss, 
                    val_ROC_AUC,
                    val_EER,
                    val_TAR_and_FAR_1e3p,
+                   val_TAR_and_FAR_1e4p,
                    val_loss, path):
     Create_Folder(path=path)
     if os.path.exists(path):
@@ -111,10 +113,12 @@ def Saving_Metric2(epoch,
             'train_ROC_AUC': pd.Series(dtype='float'),
             'train_EER': pd.Series(dtype='float'),
             'train_TAR_and_FAR_1e3p': pd.Series(dtype='float'),
+            'train_TAR_and_FAR_1e4p': pd.Series(dtype='float'),
             'val_loss': pd.Series(dtype='float'),
             'val_ROC_AUC': pd.Series(dtype='float'),
             'val_EER': pd.Series(dtype='float'),
             'val_TAR_and_FAR_1e3p': pd.Series(dtype='float'),
+            'val_TAR_and_FAR_1e4p': pd.Series(dtype='float'),
             'lr': pd.Series(dtype='float')
         })
     new_row = {
@@ -123,10 +127,12 @@ def Saving_Metric2(epoch,
         'train_ROC_AUC': train_ROC_AUC,
         'train_EER': train_EER,
         'train_TAR_and_FAR_1e3p': train_TAR_and_FAR_1e3p,
+        'train_TAR_and_FAR_1e4p': train_TAR_and_FAR_1e4p,
         'val_loss': val_loss,
         'val_ROC_AUC': val_ROC_AUC,
         'val_EER': val_EER,
-        'val_TAR_and_FAR_1e3p': val_TAR_and_FAR_1e3p
+        'val_TAR_and_FAR_1e3p': val_TAR_and_FAR_1e3p,
+        'val_TAR_and_FAR_1e4p': val_TAR_and_FAR_1e4p
     }
     metrics_df = pd.concat([metrics_df, pd.DataFrame([new_row])], ignore_index=True)
     metrics_df.to_csv(path, index=False)

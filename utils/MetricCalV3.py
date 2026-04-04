@@ -67,11 +67,13 @@ class MetricCalV3():
         self.roc_auc = auc(fpr, tpr)
 
         fnr = 1 - tpr
+        # eer_idx = np.nanargmin(np.abs(fnr - fpr))
+        # self.eer = fpr[eer_idx]
         eer_idx = np.nanargmin(np.abs(fnr - fpr))
-        self.eer = fpr[eer_idx]
+        self.eer = (fpr[eer_idx] + fnr[eer_idx]) / 2
 
-        idx = np.argmin(np.abs(fpr - 1e-3))
-        self.tpr = tpr[idx]
+        self.tpr1e3 = self.tar_at_far(1e-3, fpr, tpr)
+        self.tpr1e4 = self.tar_at_far(1e-4, fpr, tpr)
     
     @property
     def ROC_AUC(self):
@@ -92,6 +94,16 @@ class MetricCalV3():
         """
         return self.eer
     @property
-    def tar_at_far(self):
-        return self.tpr
+    def tar_at_far1e3(self):
+        return self.tpr1e3
+
+    @property
+    def tar_at_far1e4(self):
+        return self.tpr1e4
+    
+    def tar_at_far(self, target_far, fpr, tpr):
+        valid = np.where(fpr <= target_far)[0]
+        if len(valid) == 0:
+            return 0.0
+        return tpr[valid[-1]]
     

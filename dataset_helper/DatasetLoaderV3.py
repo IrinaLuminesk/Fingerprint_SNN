@@ -31,6 +31,14 @@ class SiameseFingerprintDataset(Dataset):
     def train_transform(self):
         return v2.Compose([
             v2.Resize(self.image_size),
+            v2.RandomChoice(
+                [
+                    v2.RandomHorizontalFlip(),
+                    v2.RandomRotation(degrees=(-15,15)),
+                    v2.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
+                    v2.Lambda(lambda x: x),
+                ]
+            ),
             v2.ToImage(),
             v2.ToDtype(torch.float32, scale=True),
             v2.Normalize(
